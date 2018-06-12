@@ -196,32 +196,6 @@ public class Platform {
 
   /** Attempt to match the host runtime to a capable Platform implementation. */
   private static Platform findPlatform() {
-    Platform android = AndroidPlatform.buildIfSupported();
-
-    if (android != null) {
-      return android;
-    }
-
-    if (isConscryptPreferred()) {
-      Platform conscrypt = ConscryptPlatform.buildIfSupported();
-
-      if (conscrypt != null) {
-        return conscrypt;
-      }
-    }
-
-    Platform jdk9 = Jdk9Platform.buildIfSupported();
-
-    if (jdk9 != null) {
-      return jdk9;
-    }
-
-    Platform jdkWithJettyBoot = JdkWithJettyBootPlatform.buildIfSupported();
-
-    if (jdkWithJettyBoot != null) {
-      return jdkWithJettyBoot;
-    }
-
     // Probably an Oracle JDK like OpenJDK.
     return new Platform();
   }
