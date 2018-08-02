@@ -36,11 +36,13 @@ import javax.annotation.Nullable;
 import okhttp3.internal.Util;
 import okhttp3.internal.io.FileSystem;
 import okhttp3.internal.platform.Platform;
+import okio.Buffer;
 import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Sink;
 import okio.Source;
+import okio.Timeout;
 
 import static okhttp3.internal.platform.Platform.WARN;
 
@@ -186,7 +188,7 @@ public final class DiskLruCache implements Closeable, Flushable {
           }
         } catch (IOException e) {
           mostRecentRebuildFailed = true;
-          journalWriter = Okio.buffer(Okio.blackhole());
+          journalWriter = Okio.buffer(blackhold());
         }
       }
     }
@@ -203,6 +205,24 @@ public final class DiskLruCache implements Closeable, Flushable {
     this.valueCount = valueCount;
     this.maxSize = maxSize;
     this.executor = executor;
+  }
+
+  private static Sink blackhold() {
+      return new Sink() {
+          @Override public void write(Buffer source, long byteCount) throws IOException {
+              source.skip(byteCount);
+          }
+
+          @Override public void flush() throws IOException {
+          }
+
+          @Override public Timeout timeout() {
+              return Timeout.NONE;
+          }
+
+          @Override public void close() throws IOException {
+          }
+      };
   }
 
   public synchronized void initialize() throws IOException {
@@ -888,7 +908,7 @@ public final class DiskLruCache implements Closeable, Flushable {
           throw new IllegalStateException();
         }
         if (entry.currentEditor != this) {
-          return Okio.blackhole();
+          return blackhold();
         }
         if (!entry.readable) {
           written[index] = true;
@@ -898,7 +918,7 @@ public final class DiskLruCache implements Closeable, Flushable {
         try {
           sink = fileSystem.sink(dirtyFile);
         } catch (FileNotFoundException e) {
-          return Okio.blackhole();
+          return blackhold();
         }
         return new FaultHidingSink(sink) {
           @Override protected void onException(IOException e) {
