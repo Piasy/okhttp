@@ -1589,7 +1589,7 @@ public final class HttpUrl {
       // Start by percent decoding the host. The WHATWG spec suggests doing this only after we've
       // checked for IPv6 square braces. But Chrome does it first, and that's more lenient.
       String percentDecoded = percentDecode(input, pos, limit, false);
-      return Util.canonicalizeHost(percentDecoded);
+      return percentDecoded;//Util.canonicalizeHost(percentDecoded);
     }
 
     private static int parsePort(String input, int pos, int limit) {
